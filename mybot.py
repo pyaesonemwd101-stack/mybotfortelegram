@@ -9,10 +9,11 @@ import os
 # On your local PC, it will use the fallback if you haven't set the variable.
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# IMPORTANT: If you want to test locally, put the token here temporarily.
-# But BEFORE you 'commit' and 'push' to GitHub, make sure it is empty or os.getenv only.
+# IMPORTANT: If you want to test locally on your laptop, 
+# paste your token inside the quotes below. 
+# BUT: Delete it again before you upload (push) to GitHub!
 if not BOT_TOKEN:
-    BOT_TOKEN = "" # DO NOT LEAVE YOUR TOKEN HERE ON GITHUB
+    BOT_TOKEN = "" 
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -64,5 +65,8 @@ def handle_buttons(message):
         bot.reply_to(message, "Commands: /channels, /start")
 
 if __name__ == "__main__":
-    print("✅ Bot engine active...")
-    bot.infinity_polling()
+    if not BOT_TOKEN:
+        print("❌ Error: No BOT_TOKEN found! Paste your token in mybot.py for local testing.")
+    else:
+        print("✅ Bot engine active...")
+        bot.infinity_polling()
