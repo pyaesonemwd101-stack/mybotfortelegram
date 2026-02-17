@@ -4,14 +4,15 @@ import datetime
 import time
 import os
 
-# --- CLOUD SECURITY ---
-# This pulls the token from the hosting service's environment variables (Secrets)
-# On your local PC, it will use the fallback if the environment variable isn't set.
+# --- SECURE TOKEN LOADING ---
+# On GitHub/Cloud, it looks for an environment variable named 'BOT_TOKEN'
+# On your local PC, it will use the fallback if you haven't set the variable.
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# IMPORTANT: If you want to test locally, put the token here temporarily.
+# But BEFORE you 'commit' and 'push' to GitHub, make sure it is empty or os.getenv only.
 if not BOT_TOKEN:
-    # Fallback for local testing only. 
-    # REMOVE THIS LINE before making your GitHub repo 'Public' if you want max security.
-    BOT_TOKEN = "8516246567:AAE7fmvW4xmBkgWRsQ5WVPGHJJdEBNJPycM"
+    BOT_TOKEN = "" # DO NOT LEAVE YOUR TOKEN HERE ON GITHUB
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -29,14 +30,12 @@ CHANNELS = [
 DESTINATION_CHANNELS = ["-1003872737032", "-1003806042648", "-1003891024687", "-1003740090519"]
 
 # --- HANDLERS ---
-
 @bot.message_handler(content_types=['new_chat_members', 'left_chat_member'])
 def handle_service_messages(message):
-    """Deletes 'User joined' or 'User left' messages automatically to keep chat clean"""
     try:
         bot.delete_message(message.chat.id, message.message_id)
     except Exception as e:
-        print(f"❌ Error deleting service message: {e}")
+        print(f"❌ Error: {e}")
 
 @bot.message_handler(commands=['channels'])
 def show_channels(message):
@@ -52,7 +51,7 @@ def show_channels(message):
 def send_welcome(message):
     markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     markup.add(KeyboardButton("📋 View Channels"), KeyboardButton("📩 Contact Admin"), KeyboardButton("ℹ️ Help"))
-    welcome_text = f"👋 **Welcome to Dr Sai's Manager!**\n\nManaging {len(CHANNELS)} channels 24/7."
+    welcome_text = f"👋 **Welcome to Dr Sai's Manager!**\n\nManaging {len(CHANNELS)} channels."
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
 @bot.message_handler(func=lambda message: True)
@@ -62,12 +61,8 @@ def handle_buttons(message):
     elif message.text == "📩 Contact Admin":
         bot.send_message(message.chat.id, f"👤 **Admin:** {ADMIN_LINK}", parse_mode="Markdown")
     elif message.text == "ℹ️ Help":
-        bot.reply_to(message, "Available Commands:\n/start - Restart Bot\n/channels - Show Links")
+        bot.reply_to(message, "Commands: /channels, /start")
 
-# --- START THE BOT ---
 if __name__ == "__main__":
-    # logger to help you see the bot status in your cloud logs
-    print("✅ Bot engine initialized.")
-    print("🚀 Connection established. Bot is now active 24/7.")
-    # infinity_polling is the 'Golden Rule' for cloud bots to prevent freezing
-    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+    print("✅ Bot engine active...")
+    bot.infinity_polling()
